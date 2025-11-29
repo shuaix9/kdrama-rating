@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>韓劇評分器</title>
+<style>
+  body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #fdf6f6; line-height: 1.7; }
+  h1 { color: #d81b60; text-align: center; margin-bottom: 30px; font-size: 2.2em; }
+  #dramaName { width: 100%; padding: 14px; font-size: 1.4em; text-align: center; border: 3px solid #f06292; border-radius: 12px; box-sizing: border-box; }
+  .q { background: white; padding: 18px 20px; margin: 16px 0; border-radius: 14px; box-shadow: 0 4px 12px rgba(216,27,96,0.15); }
+  label { font-weight: bold; color: #ad1457; font-size: 1.15em; display: block; margin-bottom: 4px; }
+  input[type=number] { width: 45px; padding: 5px; font-size: 1.1em; text-align: center; border: 2px solid #f06292; border-radius: 10px; }
+  .tip { font-size: 0.95em; color: #c51162; margin-top: 10px; line-height: 1.6; }
+  button { background: #ec407a; color: white; padding: 16px 50px; font-size: 1.5em; border: none; border-radius: 50px; cursor: pointer; margin: 40px auto; display: block; box-shadow: 0 4px 15px rgba(236,64,122,0.4); }
+  button:hover { background: #c51162; transform: translateY(-2px); }
+  #result { text-align: center; font-size: 2.8em; margin: 40px 0; color: #d81b60; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>韓劇評分器</h1>
+<input type="text" id="dramaName" placeholder="請輸入劇名" autofocus>
+
+<div class="q"><label>1. 每集結束的衝動程度　　<input type="number" id="q1" min="0" max="10" value="10"></label>
+<div class="tip">10分：看完立刻看下一集，停不下來<br>8分：會想追，但可以忍到明天<br>6分：還好，沒特別期待<br>3分：看完就關掉，改天繼續再看<br>0分：會猶豫要不要不看了</div></div>
+
+<div class="q"><label>2. 專注度（不會滑手機/分心）　　<input type="number" id="q2" min="0" max="10" value="10"></label>
+<div class="tip">10分：全程目不轉睛，手機完全不碰<br>7分：偶爾看一下手機但很快回來<br>3分以下：一直分心、快轉</div></div>
+
+<div class="q"><label>3. 睡前腦內迴放程度　　<input type="number" id="q3" min="0" max="10" value="10"></label>
+<div class="tip">10分：躺床上一閉眼全是劇中畫面，睡不著<br>7分：會一直想但還能睡<br>5分：偶爾閃過<br>0分：完全忘記</div></div>
+
+<div class="q"><label>4. 完結速度（總共花幾天看完）　　<input type="number" id="q4" min="0" max="10" value="10"></label>
+<div class="tip">10分：1–2天（狂追）<br>8分：3–4天<br>6分：5–7天<br>4分：8–14天<br>2分：超過2週或棄劇</div></div>
+
+<div class="q"><label>5. 看完後還會搜尋相關內容　　<input type="number" id="q5" min="0" max="10" value="10"></label>
+<div class="tip">10分：馬上Google、看幕後、刷CP、找訪問<br>7分：會想看花絮或OST<br>4分：隨便看一下劇名就關掉<br>0分：完全不想再碰任何相關內容</div></div>
+
+<div class="q"><label>6. 男女主角顏值加分　　<input type="number" id="q6" min="0" max="10" value="10"></label>
+<div class="tip">10分：神仙顏值，直接+2分整體分數的衝動<br>7分：超好看<br>5分：普通<br>3分以下：路邊</div></div>
+
+<div class="q"><label>7. 配角　　<input type="number" id="q7" min="0" max="10" value="10"></label>
+<div class="tip">10分：配角搶戲<br>5分：有幾個亮點<br>0分：全部工具人</div></div>
+
+<div class="q"><label>8. 感情線甜度／心動指數　　<input type="number" id="q8" min="0" max="10" value="10"></label>
+<div class="tip">10分：尖叫、捶床、姨母笑停不下來<br>7分：甜但不膩<br>4分以下：平淡、無聊</div></div>
+
+<div class="q"><label>9. OST神級程度　　<input type="number" id="q9" min="0" max="10" value="10"></label>
+<div class="tip">10分：每首都洗腦，直接進歌單常駐<br>8分：有幾首神曲<br>5分：普通<br>0分：聽完就忘</div></div>
+
+<div class="q"><label>10. 重刷價值　　<input type="number" id="q10" min="0" max="10" value="10"></label>
+<div class="tip">10分：隨時可以二刷、三刷<br>7分：隔幾年會想重溫<br>4分：一次就夠了<br>0分：絕對不會再看</div></div>
+
+<div class="q"><label>11. 結局滿意度　　<input type="number" id="q11" min="0" max="10" value="10"></label>
+<div class="tip">10分：完美收尾、意猶未盡但圓滿<br>8分：好但小缺憾<br>5分：爛尾但前段救回來<br>3分以下：雷到想寄刀片</div></div>
+
+<div id="result"></div>
+<div id="result"></div>
+<div id="today" style="text-align:center; color:#ad1457; font-size:1.2em; margin:20px 0;"></div>  <!-- 新增這行 -->
+<button onclick="calc()">提交並下載完整評分表</button>
+
+<script>
+function calc() {
+  const name = document.getElementById('dramaName').value.trim() || "未命名韓劇";
+  const scores = [];
+  for(let i=1; i<=11; i++){
+    let v = parseFloat(document.getElementById('q'+i).value) || 0;
+    if(v>10) v=10; if(v<0) v=0;
+    scores.push(v);
+  }
+  const total = scores.reduce((a,b)=>a+b, 0);
+  const avg = (total/11).toFixed(1);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('result').innerHTML = `<strong>${name}</strong><br>最終得分：${avg} / 10`;
+  document.getElementById('today').innerHTML = `評分日期：${today}`;
+
+  const html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>${name} 評分 ${avg}分</title><style>
+    body{font-family:"Noto Sans TC",sans-serif;background:#fff1f8;max-width:800px;margin:40px auto;padding:20px;line-height:1.8;}
+    h1{color:#d81b60;text-align:center;font-size:2em;}
+    .score{font-size:2em;text-align:center;color:#ec407a;margin:2px 0;font-weight:bold;}
+    table{width:100%;border-collapse:collapse;margin:30px 0;}
+    th,td{border:2px solid #f06292;padding:14px;text-align:left;font-size:1.1em;}
+    th{background:#f8bbd0;}
+    tr:last-child td{background:#f8bbd0;font-size:1.6em;font-weight:bold;text-align:center;}
+  </style></head><body>
+  <h1>韓劇評分表<br>《${name}》<br><small style="font-size:0.6em;color:#ad1457;"></small></h1>
+  <div class="score">${avg} / 10</div>
+  <table>
+    <tr><th>項目</th><th>分數</th><th>描述</th></tr>
+    <tr><td>1. 每集結束的衝動程度</td><td>${scores[0]}</td><td>${desc(1,scores[0])}</td></tr>
+    <tr><td>2. 專注度（不會滑手機/分心）</td><td>${scores[1]}</td><td>${desc(2,scores[1])}</td></tr>
+    <tr><td>3. 睡前腦內迴放程度</td><td>${scores[2]}</td><td>${desc(3,scores[2])}</td></tr>
+    <tr><td>4. 完結速度（總共花幾天看完）</td><td>${scores[3]}</td><td>${desc(4,scores[3])}</td></tr>
+    <tr><td>5. 看完後還會搜尋相關內容</td><td>${scores[4]}</td><td>${desc(5,scores[4])}</td></tr>
+    <tr><td>6. 男女主角顏值加分</td><td>${scores[5]}</td><td>${desc(6,scores[5])}</td></tr>
+    <tr><td>7. 配角</td><td>${scores[6]}</td><td>${desc(7,scores[6])}</td></tr>
+    <tr><td>8. 感情線甜度／心動指數</td><td>${scores[7]}</td><td>${desc(8,scores[7])}</td></tr>
+    <tr><td>9. OST神級程度</td><td>${scores[8]}</td><td>${desc(9,scores[8])}</td></tr>
+    <tr><td>10. 重刷價值</td><td>${scores[9]}</td><td>${desc(10,scores[9])}</td></tr>
+    <tr><td>11. 結局滿意度</td><td>${scores[10]}</td><td>${desc(11,scores[10])}</td></tr>
+    <tr><td colspan="3">最終得分：${avg} / 10</td></tr>
+  </table>
+  <p style="text-align:center;color:#999;font-size:0.9em;">評分日期：${today}</p>
+  <p style="text-align:center;color:#999;font-size:0.9em;">韓劇評分器產生</p>
+  </body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name}_評分_${avg}分_${today}.html`; 
+  a.click();
+}
+
+function desc(q, s){
+  const d = [
+    [],
+    ["會猶豫要不要不看了","看完就關掉，改天繼續再看","還好，沒特別期待","會想追，但可以忍到明天","看完立刻看下一集，停不下來"],
+    ["一直分心、快轉","一直分心、快轉","一直分心、快轉","偶爾看一下手機但很快回來","全程目不轉睛，手機完全不碰"],
+    ["完全忘記","完全忘記","偶爾閃過","會一直想但還能睡","躺床上一閉眼全是劇中畫面，睡不著"],
+    ["超過2週或棄劇","超過2週或棄劇","5–7天","3–4天","1–2天（狂追）"],
+    ["完全不想再碰任何相關內容","隨便看一下劇名就關掉","會想看花絮或OST","會想看花絮或OST","馬上Google、看幕後、刷CP、找訪問"],
+    ["路邊","路邊","普通","超好看","神仙顏值，直接+2分整體分數的衝動"],
+    ["全部工具人","有幾個亮點","有幾個亮點","配角搶戲","配角搶戲"],
+    ["平淡、無聊","平淡、無聊","平淡、無聊","甜但不膩","尖叫、捶床、姨母笑停不下來"],
+    ["聽完就忘","普通","有幾首神曲","有幾首神曲","每首都洗腦，直接進歌單常駐"],
+    ["絕對不會再看","一次就夠了","隔幾年會想重溫","隔幾年會想重溫","隨時可以二刷、三刷"],
+    ["雷到想寄刀片","雷到想寄刀片","爛尾但前段救回來","好但小缺憾","完美收尾、意猶未盡但圓滿"]
+  ];
+  if(s<=2) return d[q][0];
+  if(s<=4) return d[q][1];
+  if(s<=6) return d[q][2];
+  if(s<=8) return d[q][3];
+  return d[q][4];
+}
+</script>
+</body>
+</html>
