@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>我的韓劇排行榜</title>
+<style>
+  body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #fdf6f6; line-height: 1.8; }
+  h1 { color: #d81b60; text-align: center; font-size: 2.5em; margin-bottom: 10px; }
+  .subtitle { text-align: center; color: #ad1457; font-size: 1.3em; margin-bottom: 40px; }
+  table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 8px 20px rgba(216,27,96,0.2); border-radius: 15px; overflow: hidden; }
+  th { background: #f8bbd0; color: #880e4f; padding: 18px; font-size: 1.3em; }
+  td { padding: 16px; text-align: center; border-bottom: 1px solid #f8bbd0; }
+  tr:nth-child(even) { background: #fff5f8; }
+  .rank { font-size: 2em; font-weight: bold; color: #ec407a; }
+  .name { font-weight: bold; font-size: 1.3em; color: #880e4f; }
+  .score { font-size: 2em; color: #d81b60; font-weight: bold; }
+  .gold { color: #FFD700; text-shadow: 0 0 10px #ffeb3b; }
+  .silver { color: #C0C0C0; }
+  .bronze { color: #CD7F32; }
+  .refresh { text-align: center; margin: 30px 0; }
+  button { background: #ec407a; color: white; padding: 14px 40px; font-size: 1.4em; border: none; border-radius: 50px; cursor: pointer; }
+  button:hover { background: #c51162; }
+  .footer { text-align: center; color: #999; margin-top: 50px; font-size: 0.9em; }
+</style>
+</head>
+<body>
+
+<h1>我的韓劇排行榜</h1>
+<div class="subtitle">目前共 <span id="count">0</span> 部評分紀錄</div>
+
+<div class="refresh">
+  <button onclick="loadRankings()">重新整理排行榜</button>
+</div>
+
+<table id="rankingTable">
+  <thead>
+    <tr>
+      <th width="10%">名次</th>
+      <th width="50%">劇名</th>
+      <th width="20%">分數</th>
+      <th width="20%">評分日期</th>
+    </tr>
+  </thead>
+  <tbody id="rankingBody">
+    <tr><td colspan="4" style="padding:50px; color:#ad1457; font-size:1.3em;">
+      請將此檔案與你的評分檔放在同一個資料夾<br>然後點上方「重新整理排行榜」按鈕
+    </td></tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  韓劇評分系統
+</div>
+
+<script>
+async function loadRankings() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.multiple = true;
+  input.accept = '.html';
+  input.onchange = function(e) {
+    const files = e.target.files;
+    const dramas = [];
+
+    let processed = 0;
+    if(files.length === 0) return;
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const content = e.target.result;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        const title = doc.title || file.name;
+
+        const match = file.name.match(/^(.+?)_評分_([\d.]+)分_?(\d{4}-\d{2}-\d{2})?\.html$/);
+        let name = "未知劇名";
+        let score = 0;
+        let date = "未知日期";
+
+        if(match) {
+          name = match[1];
+          score = parseFloat(match[2]);
+          date = match[3] || new Date(file.lastModified).toISOString().split('T')[0];
+        } else {
+          const h1 = doc.querySelector('h1');
+          if(h1) {
+            const text = h1.textContent.replace(/韓劇評分表|《|》/g, '').trim();
+            name = text || name;
+          }
+          const scoreDiv = doc.querySelector('.score');
+          if(scoreDiv) {
+            const s = scoreDiv.textContent.match(/[\d.]+/);
+            if(s) score = parseFloat(s[0]);
+          }
+        }
+
+        dramas.push({name, score, date, fileName: file.name});
+        processed++;
+
+        if(processed === files.length) {
+          dramas.sort((a,b) => b.score - a.score);
+          displayRanking(dramas);
+        }
+      };
+      reader.readAsText(file);
+    });
+  };
+  input.click();
+}
+
+function displayRanking(dramas) {
+  document.getElementById('count').textContent = dramas.length;
+  const tbody = document.getElementById('rankingBody');
+  tbody.innerHTML = '';
+
+  dramas.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    let rankClass = '';
+    let rankText = i + 1;
+    if(i === 0) { rankClass = 'gold'; rankText += ' '; }
+    else if(i === 1) { rankClass = 'silver'; rankText += ' '; }
+    else if(i === 2) { rankClass = 'bronze'; rankText += ' '; }
+
+    tr.innerHTML = `
+      <td class="rank ${rankClass}">${rankText}</td>
+      <td class="name">${d.name}</td>
+      <td class="score">${d.score.toFixed(1)}</td>
+      <td>${d.date}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+</script>
+
+<div style="text-align:center; margin-top:50px; color:#ad1457; background:white; padding:20px; border-radius:15px;">
+  <strong>使用方法：</strong><br>
+  1. 將所有「*_評分_*.html」放在同一個資料夾<br>
+  2. 雙擊打開此檔案<br>
+  3. 點「重新整理排行榜」→ 選擇你想排名的評分檔（可全選）→ 自動產生排行！
+</div>
+
+</body>
+</html>
