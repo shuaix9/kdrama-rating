@@ -5,82 +5,168 @@
 <title>我的韓劇排行榜</title>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
-  body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #fdf6f6; line-height: 1.8; }
-  h1 { color: #d81b60; text-align: center; font-size: 2.5em; margin-bottom: 10px; }
-  .subtitle { text-align: center; color: #ad1457; font-size: 1.3em; margin-bottom: 40px; }
-  table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 8px 20px rgba(216,27,96,0.2); border-radius: 15px; overflow: hidden; }
-  th { background: #f8bbd0; color: #880e4f; padding: 18px; font-size: 1.3em; }
-  td { padding: 16px; text-align: center; border-bottom: 1px solid #f8bbd0; }
+  :root {
+    --main: #d81b60;
+    --pink: #f06292;
+    --light: #f8bbd0;
+  }
+  body {
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    margin: 0; padding: 0;
+    background: #fdf6f6;
+    min-height: 100vh;
+    line-height: 1.8;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  h1 {
+    color: var(--main);
+    text-align: center;
+    font-size: clamp(2.2rem, 8vw, 3.5rem);
+    margin: 20px 0 10px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #ad1457;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    margin-bottom: 30px;
+  }
+  .refresh {
+    text-align: center;
+    margin: 30px 0;
+  }
+  button {
+    background: #ec407a;
+    color: white;
+    padding: clamp(14px, 4vw, 18px) clamp(30px, 8vw, 50px);
+    font-size: clamp(1.3rem, 4.5vw, 1.6rem);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 8px;
+    box-shadow: 0 6px 20px rgba(236,64,122,0.4);
+    transition: all 0.3s;
+  }
+  button:hover, button:active {
+    background: #c51162;
+    transform: translateY(-3px);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 8px 25px rgba(216,27,96,0.25);
+    border-radius: 18px;
+    overflow: hidden;
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    margin: 20px 0;
+  }
+  th {
+    background: var(--light);
+    color: #880e4f;
+    padding: clamp(12px, 3vw, 20px);
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+  }
+  td {
+    padding: clamp(12px, 3vw, 18px);
+    text-align: center;
+    border-bottom: 1px solid var(--light);
+  }
   tr:nth-child(even) { background: #fff5f8; }
-  .rank { font-size: 2em; font-weight: bold; color: #ec407a; }
-  .name { font-weight: bold; font-size: 1.3em; color: #880e4f; }
-  .score { font-size: 2em; color: #d81b60; font-weight: bold; }
-  .gold { color: #FFD700; text-shadow: 0 0 10px #ffeb3b; }
-  .silver { color: #C0C0C0; }
-  .bronze { color: #CD7F32; }
-  .refresh { text-align: center; margin: 30px 0; }
-  button { background: #ec407a; color: white; padding: 14px 40px; font-size: 1.4em; border: none; border-radius: 50px; cursor: pointer; margin: 0 8px; }
-  button:hover { background: #c51162; }
-  .footer { text-align: center; color: #999; margin-top: 50px; font-size: 0.9em; }
+  .rank { font-size: clamp(1.8rem, 6vw, 2.5rem); font-weight: bold; color: #ec407a; }
+  .name { font-weight: bold; font-size: clamp(1.1rem, 4vw, 1.4rem); color: #880e4f; }
+  .score { font-size: clamp(1.6rem, 5.5vw, 2.2rem); color: var(--main); font-weight: bold; }
+  .gold { color: #FFD700; text-shadow: 0 0 12px #ffeb3b; }
+  .silver { color: #C0C0C0; text-shadow: 0 0 8px #ddd; }
+  .bronze { color: #CD7F32; text-shadow: 0 0 8px #fff; }
+  .footer {
+    text-align: center;
+    color: #999;
+    margin-top: 60px;
+    font-size: 0.9em;
+  }
+  .tip {
+    text-align: center;
+    margin: 50px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    color: #ad1457;
+    font-size: clamp(1rem, 4vw, 1.2rem);
+    box-shadow: 0 4px 15px rgba(216,27,96,0.15);
+  }
+
+  @media (max-width: 480px) {
+    .container { padding: 15px; }
+    table { font-size: 3.6vw; }
+    .name { font-size: 4.2vw; }
+  }
 </style>
 </head>
 <body>
-<h1>我的韓劇排行榜</h1>
-<div class="subtitle">目前共 <span id="count">0</span> 部評分紀錄</div>
+<div class="container">
 
-<div class="refresh">
-  <button onclick="loadRankings()">選擇資料夾，一鍵排行！</button>
+  <h1>我的韓劇排行榜</h1>
+  <div class="subtitle">目前共 <span id="count">0</span> 部評分紀錄</div>
+
+  <div class="refresh">
+    <button onclick="loadRankings()">選擇資料夾，一鍵排行！</button>
+  </div>
+
+  <table id="rankingTable">
+    <thead>
+      <tr>
+        <th width="12%">名次</th>
+        <th width="48%">劇名</th>
+        <th width="20%">分數</th>
+        <th width="20%">日期</th>
+      </tr>
+    </thead>
+    <tbody id="rankingBody">
+      <tr><td colspan="4" style="padding:60px; color:#ad1457; font-size:1.3em;">
+        請點上方按鈕 → 直接選「你的評分資料夾」→ 自動掃描所有檔案
+      </td></tr>
+    </tbody>
+  </table>
+
+  <div class="refresh">
+    <button onclick="exportImage('all')">匯出全部</button>
+    <button onclick="exportImage(10)">匯出 Top 10</button>
+    <button onclick="exportImage(20)">匯出 Top 20</button>
+    <button onclick="exportImage(50)">匯出 Top 50</button>
+  </div>
+
+  <div class="footer">韓劇評分系統</div>
+
 </div>
 
-<table id="rankingTable">
-  <thead>
-    <tr>
-      <th width="10%">名次</th>
-      <th width="50%">劇名</th>
-      <th width="20%">分數</th>
-      <th width="20%">評分日期</th>
-    </tr>
-  </thead>
-  <tbody id="rankingBody">
-    <tr><td colspan="4" style="padding:50px; color:#ad1457; font-size:1.3em;">
-      請點上方按鈕 → 直接選「你的評分資料夾」→ 自動掃描所有檔案
-    </td></tr>
-  </tbody>
-</table>
-
-<div class="refresh" style="margin-top:40px;">
-  <button onclick="exportImage('all')">匯出全部</button>
-  <button onclick="exportImage(10)">匯出 Top 10</button>
-  <button onclick="exportImage(20)">匯出 Top 20</button>
-  <button onclick="exportImage(50)">匯出 Top 50</button>
-</div>
-
-<div class="footer">
-  韓劇評分系統
+<div class="tip">
+  <strong>使用方法：</strong><br>
+  1. 點「選擇資料夾，一鍵排行！」→ 直接選你的評分資料夾<br>
+  2. 自動掃描所有評分檔，瞬間產生排行榜！<br>
+  3. 點下方匯出按鈕即可下載排行榜圖片
 </div>
 
 <script>
 let currentDramas = [];
-
 async function loadRankings() {
   if (!('showDirectoryPicker' in window)) {
     alert('你的瀏覽器不支援選資料夾功能，請用 Chrome 或 Edge 最新版喔～');
     return;
   }
-
   try {
     const dirHandle = await window.showDirectoryPicker();
     currentDramas = [];
-    
     for await (const entry of dirHandle.values()) {
       if (entry.kind === 'file' && entry.name.endsWith('.html')) {
         const file = await entry.getFile();
         const content = await file.text();
         const doc = new DOMParser().parseFromString(content, 'text/html');
-        
         const match = file.name.match(/^(.+?)_評分_([\d.]+)分_?(\d{4}-\d{2}-\d{2})?\.html$/);
         let name = "未知劇名", score = 0, date = "未知日期";
-        
         if (match) {
           name = match[1];
           score = parseFloat(match[2]);
@@ -91,26 +177,19 @@ async function loadRankings() {
           const scoreDiv = doc.querySelector('.score');
           if (scoreDiv) score = parseFloat(scoreDiv.textContent.match(/[\d.]+/)[0] || 0);
         }
-        
         currentDramas.push({name, score, date});
       }
     }
-
     if (currentDramas.length === 0) {
       alert('資料夾裡沒有找到評分檔喔～');
       return;
     }
-
     currentDramas.sort((a,b) => b.score - a.score);
     displayRanking(currentDramas);
-    
   } catch (err) {
-    if (err.name !== 'AbortError') {
-      alert('讀取失敗：' + err.message);
-    }
+    if (err.name !== 'AbortError') alert('讀取失敗：' + err.message);
   }
 }
-
 function displayRanking(dramas) {
   document.getElementById('count').textContent = dramas.length;
   const tbody = document.getElementById('rankingBody');
@@ -130,18 +209,11 @@ function displayRanking(dramas) {
     tbody.appendChild(tr);
   });
 }
-
 async function exportImage(limit = 'all') {
-  if (currentDramas.length === 0) {
-    alert('請先載入評分檔！');
-    return;
-  }
+  if (currentDramas.length === 0) { alert('請先載入評分檔！'); return; }
   const temp = document.createElement('div');
-  temp.style.position = 'absolute';
-  temp.style.left = '-9999px';
-  temp.style.padding = '40px';
-  temp.style.background = 'white';
-  temp.style.borderRadius = '20px';
+  temp.style.position = 'absolute'; temp.style.left = '-9999px';
+  temp.style.padding = '40px'; temp.style.background = 'white'; temp.style.borderRadius = '20px';
   temp.innerHTML = `
     <h1 style="text-align:center;color:#d81b60;font-size:3em;margin:0 0 20px;">我的韓劇排行榜</h1>
     <p style="text-align:center;color:#ad1457;font-size:1.5em;margin-bottom:30px;">
@@ -149,10 +221,8 @@ async function exportImage(limit = 'all') {
     </p>
     <table style="width:100%;border-collapse:collapse;font-size:1.4em;">
       <thead><tr style="background:#f8bbd0;">
-        <th style="padding:15px;">名次</th>
-        <th style="padding:15px;">劇名</th>
-        <th style="padding:15px;">分數</th>
-        <th style="padding:15px;">日期</th>
+        <th style="padding:15px;">名次</th><th style="padding:15px;">劇名</th>
+        <th style="padding:15px;">分數</th><th style="padding:15px;">日期</th>
       </tr></thead>
       <tbody>
         ${currentDramas.slice(0, limit === 'all' ? undefined : limit).map((d,i) => `
@@ -175,12 +245,5 @@ async function exportImage(limit = 'all') {
   document.body.removeChild(temp);
 }
 </script>
-
-<div style="text-align:center; margin-top:50px; color:#ad1457; background:white; padding:20px; border-radius:15px;">
-  <strong>使用方法：</strong><br>
-  1. 點「選擇資料夾，一鍵排行！」→ 直接選你的評分資料夾<br>
-  2. 自動掃描所有評分檔，瞬間產生排行榜！<br>
-  3. 點下方匯出按鈕即可下載排行榜圖片
-</div>
 </body>
 </html>
