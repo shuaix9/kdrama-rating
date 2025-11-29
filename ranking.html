@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>我的韓劇排行榜</title>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
   body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #fdf6f6; line-height: 1.8; }
   h1 { color: #d81b60; text-align: center; font-size: 2.5em; margin-bottom: 10px; }
@@ -18,18 +19,17 @@
   .silver { color: #C0C0C0; }
   .bronze { color: #CD7F32; }
   .refresh { text-align: center; margin: 30px 0; }
-  button { background: #ec407a; color: white; padding: 14px 40px; font-size: 1.4em; border: none; border-radius: 50px; cursor: pointer; }
+  button { background: #ec407a; color: white; padding: 14px 40px; font-size: 1.4em; border: none; border-radius: 50px; cursor: pointer; margin: 0 8px; }
   button:hover { background: #c51162; }
   .footer { text-align: center; color: #999; margin-top: 50px; font-size: 0.9em; }
 </style>
 </head>
 <body>
-
 <h1>我的韓劇排行榜</h1>
 <div class="subtitle">目前共 <span id="count">0</span> 部評分紀錄</div>
 
 <div class="refresh">
-  <button onclick="loadRankings()">自動排序排行榜</button>
+  <button onclick="loadRankings()">選擇資料夾，一鍵排行！</button>
 </div>
 
 <table id="rankingTable">
@@ -43,87 +43,86 @@
   </thead>
   <tbody id="rankingBody">
     <tr><td colspan="4" style="padding:50px; color:#ad1457; font-size:1.3em;">
-      請將你的評分檔放在同一個資料夾<br>然後點上方「自動排序排行榜」按鈕
+      請點上方按鈕 → 直接選「你的評分資料夾」→ 自動掃描所有檔案
     </td></tr>
   </tbody>
 </table>
+
+<div class="refresh" style="margin-top:40px;">
+  <button onclick="exportImage('all')">匯出全部</button>
+  <button onclick="exportImage(10)">匯出 Top 10</button>
+  <button onclick="exportImage(20)">匯出 Top 20</button>
+  <button onclick="exportImage(50)">匯出 Top 50</button>
+</div>
 
 <div class="footer">
   韓劇評分系統
 </div>
 
 <script>
+let currentDramas = [];
+
 async function loadRankings() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.multiple = true;
-  input.accept = '.html';
-  input.onchange = function(e) {
-    const files = e.target.files;
-    const dramas = [];
+  if (!('showDirectoryPicker' in window)) {
+    alert('你的瀏覽器不支援選資料夾功能，請用 Chrome 或 Edge 最新版喔～');
+    return;
+  }
 
-    let processed = 0;
-    if(files.length === 0) return;
-
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const content = e.target.result;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(content, 'text/html');
-        const title = doc.title || file.name;
-
+  try {
+    const dirHandle = await window.showDirectoryPicker();
+    currentDramas = [];
+    
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file' && entry.name.endsWith('.html')) {
+        const file = await entry.getFile();
+        const content = await file.text();
+        const doc = new DOMParser().parseFromString(content, 'text/html');
+        
         const match = file.name.match(/^(.+?)_評分_([\d.]+)分_?(\d{4}-\d{2}-\d{2})?\.html$/);
-        let name = "未知劇名";
-        let score = 0;
-        let date = "未知日期";
-
-        if(match) {
+        let name = "未知劇名", score = 0, date = "未知日期";
+        
+        if (match) {
           name = match[1];
           score = parseFloat(match[2]);
-          date = match[3] || new Date(file.lastModified).toISOString().split('T')[0];
+          date = match[3] || file.lastModified ? new Date(file.lastModified).toISOString().split('T')[0] : "未知日期";
         } else {
           const h1 = doc.querySelector('h1');
-          if(h1) {
-            const text = h1.textContent.replace(/韓劇評分表|《|》/g, '').trim();
-            name = text || name;
-          }
+          if (h1) name = h1.textContent.replace(/韓劇評分表|《|》/g, '').trim();
           const scoreDiv = doc.querySelector('.score');
-          if(scoreDiv) {
-            const s = scoreDiv.textContent.match(/[\d.]+/);
-            if(s) score = parseFloat(s[0]);
-          }
+          if (scoreDiv) score = parseFloat(scoreDiv.textContent.match(/[\d.]+/)[0] || 0);
         }
+        
+        currentDramas.push({name, score, date});
+      }
+    }
 
-        dramas.push({name, score, date, fileName: file.name});
-        processed++;
+    if (currentDramas.length === 0) {
+      alert('資料夾裡沒有找到評分檔喔～');
+      return;
+    }
 
-        if(processed === files.length) {
-          dramas.sort((a,b) => b.score - a.score);
-          displayRanking(dramas);
-        }
-      };
-      reader.readAsText(file);
-    });
-  };
-  input.click();
+    currentDramas.sort((a,b) => b.score - a.score);
+    displayRanking(currentDramas);
+    
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      alert('讀取失敗：' + err.message);
+    }
+  }
 }
 
 function displayRanking(dramas) {
   document.getElementById('count').textContent = dramas.length;
   const tbody = document.getElementById('rankingBody');
   tbody.innerHTML = '';
-
   dramas.forEach((d, i) => {
     const tr = document.createElement('tr');
     let rankClass = '';
-    let rankText = i + 1;
-    if(i === 0) { rankClass = 'gold'; rankText += ' '; }
-    else if(i === 1) { rankClass = 'silver'; rankText += ' '; }
-    else if(i === 2) { rankClass = 'bronze'; rankText += ' '; }
-
+    if (i === 0) rankClass = 'gold';
+    else if (i === 1) rankClass = 'silver';
+    else if (i === 2) rankClass = 'bronze';
     tr.innerHTML = `
-      <td class="rank ${rankClass}">${rankText}</td>
+      <td class="rank ${rankClass}">${i+1}</td>
       <td class="name">${d.name}</td>
       <td class="score">${d.score.toFixed(1)}</td>
       <td>${d.date}</td>
@@ -131,16 +130,57 @@ function displayRanking(dramas) {
     tbody.appendChild(tr);
   });
 }
+
+async function exportImage(limit = 'all') {
+  if (currentDramas.length === 0) {
+    alert('請先載入評分檔！');
+    return;
+  }
+  const temp = document.createElement('div');
+  temp.style.position = 'absolute';
+  temp.style.left = '-9999px';
+  temp.style.padding = '40px';
+  temp.style.background = 'white';
+  temp.style.borderRadius = '20px';
+  temp.innerHTML = `
+    <h1 style="text-align:center;color:#d81b60;font-size:3em;margin:0 0 20px;">我的韓劇排行榜</h1>
+    <p style="text-align:center;color:#ad1457;font-size:1.5em;margin-bottom:30px;">
+      共 ${currentDramas.length} 部 • Top ${limit === 'all' ? '全部' : limit}
+    </p>
+    <table style="width:100%;border-collapse:collapse;font-size:1.4em;">
+      <thead><tr style="background:#f8bbd0;">
+        <th style="padding:15px;">名次</th>
+        <th style="padding:15px;">劇名</th>
+        <th style="padding:15px;">分數</th>
+        <th style="padding:15px;">日期</th>
+      </tr></thead>
+      <tbody>
+        ${currentDramas.slice(0, limit === 'all' ? undefined : limit).map((d,i) => `
+          <tr style="${i%2===0?'background:#fff5f8':''}">
+            <td style="text-align:center;font-weight:bold;font-size:1.8em;color:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#ec407a'};">${i+1}</td>
+            <td style="text-align:center;font-weight:bold;color:#880e4f;">${d.name}</td>
+            <td style="text-align:center;font-weight:bold;font-size:1.8em;color:#d81b60;">${d.score.toFixed(1)}</td>
+            <td style="text-align:center;color:#ad1457;">${d.date}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+  document.body.appendChild(temp);
+  const canvas = await html2canvas(temp, {scale: 2, backgroundColor: '#ffffff'});
+  const a = document.createElement('a');
+  a.download = `韓劇排行_Top${limit==='all'?'全部':limit}_${new Date().toISOString().slice(0,10)}.png`;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+  document.body.removeChild(temp);
+}
 </script>
 
 <div style="text-align:center; margin-top:50px; color:#ad1457; background:white; padding:20px; border-radius:15px;">
   <strong>使用方法：</strong><br>
-  1. 將所有「*_評分_*.html」放在同一個資料夾<br>
-  2. 雙擊打開此檔案<br>
-  3. 點「重新整理排行榜」→ 選擇你想排名的評分檔（可全選）→ 自動產生排行！
+  1. 點「選擇資料夾，一鍵排行！」→ 直接選你的評分資料夾<br>
+  2. 自動掃描所有評分檔，瞬間產生排行榜！<br>
+  3. 點下方匯出按鈕即可下載排行榜圖片
 </div>
-
 </body>
-
 </html>
-
