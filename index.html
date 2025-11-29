@@ -4,61 +4,171 @@
 <meta charset="UTF-8">
 <title>韓劇評分器</title>
 <style>
-  body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #fdf6f6; line-height: 1.7; }
-  h1 { color: #d81b60; text-align: center; margin-bottom: 30px; font-size: 2.2em; }
-  #dramaName { width: 100%; padding: 14px; font-size: 1.4em; text-align: center; border: 3px solid #f06292; border-radius: 12px; box-sizing: border-box; }
-  .q { background: white; padding: 18px 20px; margin: 16px 0; border-radius: 14px; box-shadow: 0 4px 12px rgba(216,27,96,0.15); }
-  label { font-weight: bold; color: #ad1457; font-size: 1.15em; display: block; margin-bottom: 4px; }
-  input[type=number] { width: 45px; padding: 5px; font-size: 1.1em; text-align: center; border: 2px solid #f06292; border-radius: 10px; }
-  .tip { font-size: 0.95em; color: #c51162; margin-top: 10px; line-height: 1.6; }
-  button { background: #ec407a; color: white; padding: 16px 50px; font-size: 1.5em; border: none; border-radius: 50px; cursor: pointer; margin: 40px auto; display: block; box-shadow: 0 4px 15px rgba(236,64,122,0.4); }
-  button:hover { background: #c51162; transform: translateY(-2px); }
-  #result { text-align: center; font-size: 2.8em; margin: 40px 0; color: #d81b60; font-weight: bold; }
+  :root {
+    --main-color: #d81b60;
+    --pink: #f06292;
+    --light: #f8bbd0;
+  }
+
+  body {
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #fdf6f6;
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  h1 {
+    color: var(--main-color);
+    text-align: center;
+    font-size: clamp(2rem, 8vw, 3rem);
+    margin: 30px 0 20px;
+  }
+
+  #dramaName {
+    width: 100%;
+    padding: 16px;
+    font-size: clamp(1.3rem, 5vw, 1.6rem);
+    text-align: center;
+    border: 3px solid var(--pink);
+    border-radius: 16px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+  }
+
+  .q {
+    background: white;
+    padding: clamp(16px, 4vw, 24px);
+    margin: 16px 0;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(216,27,96,0.2);
+  }
+
+  label {
+    font-weight: bold;
+    color: #ad1457;
+    font-size: clamp(1.1rem, 4.5vw, 1.3rem);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  input[type=number] {
+    width: 50px;
+    height: 35px;
+    padding: 2px;
+    font-size: 1.2rem;
+    text-align: center;
+    border: 3px solid var(--pink);
+    border-radius: 12px;
+    background: #fff5f8;
+  }
+
+  .tip {
+    font-size: clamp(0.95rem, 3.8vw, 1.05rem);
+    color: #c51162;
+    margin-top: 12px;
+    line-height: 1.6;
+    padding-left: 5px;
+  }
+
+  button {
+    background: #ec407a;
+    color: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 18px;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 50px auto;
+    display: block;
+    box-shadow: 0 6px 20px rgba(236,64,122,0.4);
+    transition: all 0.3s;
+  }
+
+  button:hover, button:active {
+    background: #c51162;
+    transform: translateY(-3px);
+  }
+
+  #result {
+    text-align: center;
+    font-size: clamp(2.5rem, 10vw, 4rem);
+    margin: 40px 0;
+    color: var(--main-color);
+    font-weight: bold;
+  }
+
+  #today {
+    text-align: center;
+    color: #ad1457;
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    margin: 20px 0;
+  }
+
+  @media (max-width: 480px) {
+    .container { padding: 15px; }
+    input[type=number] { width: 65px; height: 55px; font-size: 2rem; }
+    button { width: 95%; padding: 20px; }
+    .tip { font-size: 1rem; }
+  }
 </style>
 </head>
 <body>
+<div class="container">
 
-<h1>韓劇評分器</h1>
-<input type="text" id="dramaName" placeholder="請輸入劇名" autofocus>
+	<h1>韓劇評分器</h1>
+	<input type="text" id="dramaName" placeholder="請輸入劇名" autofocus>
 
-<div class="q"><label>1. 每集結束的衝動程度　　<input type="number" id="q1" min="0" max="10" value="10"></label>
-<div class="tip">10分：看完立刻看下一集，停不下來<br>8分：會想追，但可以忍到明天<br>6分：還好，沒特別期待<br>3分：看完就關掉，改天繼續再看<br>0分：會猶豫要不要不看了</div></div>
+	<div class="q"><label>1. 每集結束的衝動程度　　<input type="number" id="q1" min="0" max="10" value="10"></label>
+	<div class="tip">10分：看完立刻看下一集，停不下來<br>8分：會想追，但可以忍到明天<br>6分：還好，沒特別期待<br>3分：看完就關掉，改天繼續再看<br>0分：會猶豫要不要不看了</div></div>
 
-<div class="q"><label>2. 專注度（不會滑手機/分心）　　<input type="number" id="q2" min="0" max="10" value="10"></label>
-<div class="tip">10分：全程目不轉睛，手機完全不碰<br>7分：偶爾看一下手機但很快回來<br>3分以下：一直分心、快轉</div></div>
+	<div class="q"><label>2. 專注度（不會滑手機/分心）　　<input type="number" id="q2" min="0" max="10" value="10"></label>
+	<div class="tip">10分：全程目不轉睛，手機完全不碰<br>7分：偶爾看一下手機但很快回來<br>3分以下：一直分心、快轉</div></div>
 
-<div class="q"><label>3. 睡前腦內迴放程度　　<input type="number" id="q3" min="0" max="10" value="10"></label>
-<div class="tip">10分：躺床上一閉眼全是劇中畫面，睡不著<br>7分：會一直想但還能睡<br>5分：偶爾閃過<br>0分：完全忘記</div></div>
+	<div class="q"><label>3. 睡前腦內迴放程度　　<input type="number" id="q3" min="0" max="10" value="10"></label>
+	<div class="tip">10分：躺床上一閉眼全是劇中畫面，睡不著<br>7分：會一直想但還能睡<br>5分：偶爾閃過<br>0分：完全忘記</div></div>
 
-<div class="q"><label>4. 完結速度（總共花幾天看完）　　<input type="number" id="q4" min="0" max="10" value="10"></label>
-<div class="tip">10分：1–2天（狂追）<br>8分：3–4天<br>6分：5–7天<br>4分：8–14天<br>2分：超過2週或棄劇</div></div>
+	<div class="q"><label>4. 完結速度（總共花幾天看完）　　<input type="number" id="q4" min="0" max="10" value="10"></label>
+	<div class="tip">10分：1–2天（狂追）<br>8分：3–4天<br>6分：5–7天<br>4分：8–14天<br>2分：超過2週或棄劇</div></div>
 
-<div class="q"><label>5. 看完後還會搜尋相關內容　　<input type="number" id="q5" min="0" max="10" value="10"></label>
-<div class="tip">10分：馬上Google、看幕後、刷CP、找訪問<br>7分：會想看花絮或OST<br>4分：隨便看一下劇名就關掉<br>0分：完全不想再碰任何相關內容</div></div>
+	<div class="q"><label>5. 看完後還會搜尋相關內容　　<input type="number" id="q5" min="0" max="10" value="10"></label>
+	<div class="tip">10分：馬上Google、看幕後、刷CP、找訪問<br>7分：會想看花絮或OST<br>4分：隨便看一下劇名就關掉<br>0分：完全不想再碰任何相關內容</div></div>
 
-<div class="q"><label>6. 男女主角顏值加分　　<input type="number" id="q6" min="0" max="10" value="10"></label>
-<div class="tip">10分：神仙顏值，直接+2分整體分數的衝動<br>7分：超好看<br>5分：普通<br>3分以下：路邊</div></div>
+	<div class="q"><label>6. 男女主角顏值加分　　<input type="number" id="q6" min="0" max="10" value="10"></label>
+	<div class="tip">10分：神仙顏值，直接+2分整體分數的衝動<br>7分：超好看<br>5分：普通<br>3分以下：路邊</div></div>
 
-<div class="q"><label>7. 配角　　<input type="number" id="q7" min="0" max="10" value="10"></label>
-<div class="tip">10分：配角搶戲<br>5分：有幾個亮點<br>0分：全部工具人</div></div>
+	<div class="q"><label>7. 配角　　<input type="number" id="q7" min="0" max="10" value="10"></label>
+	<div class="tip">10分：配角搶戲<br>5分：有幾個亮點<br>0分：全部工具人</div></div>
 
-<div class="q"><label>8. 感情線甜度／心動指數　　<input type="number" id="q8" min="0" max="10" value="10"></label>
-<div class="tip">10分：尖叫、捶床、姨母笑停不下來<br>7分：甜但不膩<br>4分以下：平淡、無聊</div></div>
+	<div class="q"><label>8. 感情線甜度／心動指數　　<input type="number" id="q8" min="0" max="10" value="10"></label>
+	<div class="tip">10分：尖叫、捶床、姨母笑停不下來<br>7分：甜但不膩<br>4分以下：平淡、無聊</div></div>
 
-<div class="q"><label>9. 劇情節奏　　<input type="number" id="q9" min="0" max="10" value="10"></label>
-<div class="tip">10分：節奏完美、毫無冷場<br>8分：大部分都流暢，有少數緩慢片段，整體推進速度剛好<br>6分：節奏普通，有些集數很好看、有些有點拖<br>4分：明顯拖戲、重複、注水<br>2分：節奏混亂或突然亂跳<br>0分：完全看不下去，節奏又慢又亂</div></div>
+	<div class="q"><label>9. 劇情節奏　　<input type="number" id="q9" min="0" max="10" value="10"></label>
+	<div class="tip">10分：節奏完美、毫無冷場<br>8分：大部分都流暢，有少數緩慢片段，整體推進速度剛好<br>6分：節奏普通，有些集數很好看、有些有點拖<br>4分：明顯拖戲、重複、注水<br>2分：節奏混亂或突然亂跳<br>0分：完全看不下去，節奏又慢又亂</div></div>
 
-<div class="q"><label>10. 重刷價值　　<input type="number" id="q10" min="0" max="10" value="10"></label>
-<div class="tip">10分：隨時可以二刷、三刷<br>7分：隔幾年會想重溫<br>4分：一次就夠了<br>0分：絕對不會再看</div></div>
+	<div class="q"><label>10. 重刷價值　　<input type="number" id="q10" min="0" max="10" value="10"></label>
+	<div class="tip">10分：隨時可以二刷、三刷<br>7分：隔幾年會想重溫<br>4分：一次就夠了<br>0分：絕對不會再看</div></div>
 
-<div class="q"><label>11. 結局滿意度　　<input type="number" id="q11" min="0" max="10" value="10"></label>
-<div class="tip">10分：完美收尾、意猶未盡但圓滿<br>8分：好但小缺憾<br>5分：爛尾但前段救回來<br>3分以下：災難</div></div>
+	<div class="q"><label>11. 結局滿意度　　<input type="number" id="q11" min="0" max="10" value="10"></label>
+	<div class="tip">10分：完美收尾、意猶未盡但圓滿<br>8分：好但小缺憾<br>5分：爛尾但前段救回來<br>3分以下：災難</div></div>
 
-<div id="result"></div>
-<div id="result"></div>
-<div id="today" style="text-align:center; color:#ad1457; font-size:1.2em; margin:20px 0;"></div>  <!-- 新增這行 -->
-<button onclick="calc()">提交並下載完整評分表</button>
-
+	<div id="result"></div>
+	<div id="today" style="text-align:center; color:#ad1457; font-size:1.2em; margin:20px 0;"></div>  <!-- 新增這行 -->
+	<button onclick="calc()">提交並下載完整評分表</button>
+	
+</div>
 <script>
 function calc() {
   const name = document.getElementById('dramaName').value.trim() || "未命名韓劇";
@@ -71,10 +181,8 @@ function calc() {
   const total = scores.reduce((a,b)=>a+b, 0);
   const avg = (total/11).toFixed(1);
 
-  // 自動抓今天日期（格式：2025-11-29）
   const today = new Date().toISOString().split('T')[0];
 
-  // 畫面上顯示
   document.getElementById('result').innerHTML = `<strong>${name}</strong><br>最終得分：${avg} / 10`;
   document.getElementById('today').innerHTML = `評分日期：${today}`;
 
